@@ -8,13 +8,18 @@ import pandas as pd
 from bson import json_util
 from collections import namedtuple
 from ast import literal_eval
+import numpy as np
 
+np.random.seed(1)
 
 def correlation1():
     client = MongoClient(port=27017)
     db = client.final
-    result = db.coins.find({'time': { '$gt' : 1506816000, '$lt':1514764800}})
-    print(json.dumps(list(result), sort_keys=True, indent=4, default=json_util.default))
+    result = db.coins.find({'time': { '$gt' : 1506816000, '$lt':1514764800}, 'FROM': 'DOGE', 'TO': 'ZEC'})
+    #print(list(result))
+    df = pd.DataFrame(list(result))
+    print(df.describe())
+    print(df.corr())
 
 
 def correlation2():
