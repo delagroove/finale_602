@@ -21,6 +21,10 @@ app = Flask(__name__)
 def index():
     return doCorr()
 
+@app.route('/corr2')
+def index2():
+    return doCorr2()
+
 def correlation1():
     client = MongoClient(port=27017)
     db = client.final
@@ -41,14 +45,30 @@ def correlation2():
 def doCorr():
     client = MongoClient(port=27017)
     db = client.finals
-    records = db.coins.find()
+    records = db.coins_usd.find({'time': { '$gt' : 1506816000, '$lt':1514764800}})
     recjson = dumps(records)
+    #print(recjson)
     bjson = json.loads(recjson)
     dfret = pd.DataFrame(bjson)
     dfret.set_index('time')
+    dfret = dfret.select(lambda col: col.find('close') > -1, axis=1)
+    #dfret.filter(regex=("/close/"))
     dfcorr = dfret.corr()
     return dfcorr.to_json()
 
+def doCorr2():
+    client = MongoClient(port=27017)
+    db = client.finals
+    records = db.coins_usd.find({'time': { '$gt' : 1514764800, '$lt':1522540800}})
+    recjson = dumps(records)
+    #print(recjson)
+    bjson = json.loads(recjson)
+    dfret = pd.DataFrame(bjson)
+    dfret.set_index('time')
+    dfret = dfret.select(lambda col: col.find('close') > -1, axis=1)
+    #dfret.filter(regex=("/close/"))
+    dfcorr = dfret.corr()
+    return dfcorr.to_json()
 
 if __name__ == "__main__":
     app.run(debug=True)
