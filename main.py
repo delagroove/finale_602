@@ -9,16 +9,25 @@ from bson import json_util
 from collections import namedtuple
 from ast import literal_eval
 import numpy as np
+from bson import json_util
+from bson.json_util import dumps
+from flask import Flask, render_template
+from flask import request
 
-np.random.seed(1)
+app = Flask(__name__)
+
+
+@app.route('/')
+def index():
+    return doCorr()
 
 def correlation1():
     client = MongoClient(port=27017)
     db = client.final
-    result = db.coins.find({'time': { '$gt' : 1506816000, '$lt':1514764800}, 'FROM': 'DOGE', 'TO': 'ZEC'})
-    #print(list(result))
+    result = db.coins.find({'time': { '$gt' : 1506816000, '$lt':1514764800}, 'FROM': 'BTC', 'TO': 'BTS'})
     df = pd.DataFrame(list(result))
-    print(df.describe())
+    #print(df.describe())
+    print(df)
     print(df.corr())
 
 
@@ -28,7 +37,18 @@ def correlation2():
     result = db.coins.find({'time': { '$gt' : 1514764800, '$lt':1522540800}})
     print(json.dumps(list(result), sort_keys=True, indent=4, default=json_util.default))
 
-# 1506816000 -> october 1st 2017 00:00UTC
-# 1514764800 jan 1 2018 00:00UTC
-# 1522540800 April 1, 2018 00:00 UTC
-correlation1()
+
+def doCorr():
+    client = MongoClient(port=27017)
+    db = client.finals
+    records = db.coins.find()
+    recjson = dumps(records)
+    bjson = json.loads(recjson)
+    dfret = pd.DataFrame(bjson)
+    dfret.set_index('time')
+    dfcorr = dfret.corr()
+    return dfcorr.to_json()
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
