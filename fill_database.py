@@ -21,6 +21,7 @@ class CryptoDBUtil():
 
         rec = db.coins.find()
         if rec.count() > 0:
+            print("Removing existing collection..")
             db.drop_collection('coins')
 
         dfResult = pd.DataFrame()
@@ -29,7 +30,6 @@ class CryptoDBUtil():
         newlist = sorted(res_json, key=lambda k: k['SortOrder'])
         currencies = []
         for item in newlist:
-            print("Removing existing collection..")
             currencies.append(item['Name'])
         #print(currencies)
 
