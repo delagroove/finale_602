@@ -7,6 +7,7 @@ import itertools
 from bson.json_util import dumps
 from datetime import datetime
 import pandas as pd
+from multiprocessing.dummy import Pool as ThreadPool
 db = None
 
 class CryptoDBUtil():
@@ -54,6 +55,7 @@ class CryptoDBUtil():
         db.coins.insert(records)
         print(datetime.now())
         return True
+
     def coinFiatList(self):
         print(datetime.now())
         client = MongoClient(port=27017)
@@ -63,39 +65,69 @@ class CryptoDBUtil():
         if rec.count() > 0:
             print("Removing existing collection..")
             db.drop_collection('coins_usd')
+            db.drop_collection('currencies')
 
-        dfResult = pd.DataFrame()
-        res = requests.get('https://min-api.cryptocompare.com/data/all/coinlist')
-        res_json = [x for x in res.json()['Data'].values() if int(x['SortOrder']) < 15]
-        newlist = sorted(res_json, key=lambda k: k['SortOrder'])
+        dfCoinlist = pd.DataFrame()
+        currrec = db.tickerlist.find()
+        if (currrec.count() > 0):
+            recjson = dumps(currrec)
+            bjson = json.loads(recjson)
+            dfCoinlist = pd.DataFrame(bjson)
+        else:
+            dfResult = pd.DataFrame()
+            url = "https://api.coinmarketcap.com/v1/ticker/"
+            dfCoinlist = pd.read_json(url)
+
+        newlist = dfCoinlist.loc[dfCoinlist['rank'] < 100].sort_values(by=['rank'])["symbol"]
+        print(newlist)
+        records = json.loads(dfCoinlist.T.to_json()).values()
+        if (currrec.count() == 0):
+            db.tickerlist.insert(records)
+
         currencies = []
+        curr_with_data = []
         for item in newlist:
-            currencies.append(item['Name'])
-        #print(currencies)
+            currencies.append(item)
 
-        #pairs = list(itertools.combinations(currencies, 2))
-        i = 0
+        urls = []
         for currency in currencies:
-            print("processing..." + currency + ":")
-            res = requests.get("https://min-api.cryptocompare.com/data/histoday?fsym="+currency+"&tsym=USD&limit=730")
-            df = pd.DataFrame(res.json()['Data'])
-            #print(df)
-            df1 = df[['time', 'open', 'close', 'volumeto', 'volumefrom']]
-            df1.columns = ['time', currency+" open", currency+" close", currency+' volumeto', currency+" volumefrom"]
-            if i==0:
-                dfResult = df1
-                i = i + 1  #not required after i > 0
+            urls.append("https://min-api.cryptocompare.com/data/histoday?fsym=" + currency + "&tsym=USD&limit=730")
+
+        pool = ThreadPool(13)
+        results = pool.map(requests.get, urls)
+        pool.close()
+        pool.join()
+
+        n = 0
+        for result in results:
+            if len(result.json()['Data']) > 0:
+                df = pd.DataFrame(result.json()['Data'])
+                #df = df.loc[df['close'] > 0]
+                df1 = df[['time', 'open', 'close', 'volumeto', 'volumefrom']]
+                df1.columns = ['time', currencies[n] + "_open", currencies[n] + "_close", currencies[n] + '_volumeto',
+                               currencies[n] + "_volumefrom"]
+                if n == 0:
+                    dfResult = df1
+                else:
+                    dfResult = pd.merge(dfResult, df1, how='inner', on='time')
+                curr_with_data.append([currencies[n],n])
+                df1.to_csv("c:\\temp\\dfcsv\\" + currencies[n] + ".csv")
+                print("Processed..." + currencies[n] + ":" + str(n) + ":" + str(len(result.json()['Data'])))
             else:
-                dfResult = pd.merge(dfResult, df1, how='inner', on='time')
-        #print(dfResult)
-        #print(dfResult.T)
-        #print(dfResult.T.to_json())
+                print("Error processing..." + currencies[n] + ":" + str(n) + ":" + str(len(result.json()['Data'])))
+            n = n + 1
+
         records = json.loads(dfResult.T.to_json()).values()
         db.coins_usd.insert(records)
-        print(datetime.now())
+
+        dfcurr = pd.DataFrame(curr_with_data)
+        dfcurr.columns = ['symbol', 'rank']
+        records = json.loads(dfcurr.T.to_json()).values()
+        db.currencies.insert(records)
+
         return True
 
 
 cobj = CryptoDBUtil()
-cobj.coinList()
+#cobj.coinList()
 cobj.coinFiatList()
