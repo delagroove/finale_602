@@ -4,7 +4,5 @@ pymongo
 requests
 flask
 datetime
-time
 bson
-types
-ast
+flask_cors

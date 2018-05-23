@@ -12,4 +12,4 @@ CMD [ "python", "/usr/src/app/final_602/fill_database.py” ]
 
 CMD [ "python", "/usr/src/app/final_602/main.py" ]
 
-EXPOSE 4200
+EXPOSE 5000
