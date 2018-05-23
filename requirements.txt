@@ -1,0 +1,10 @@
+pandas
+numpy
+pymongo
+requests
+flask
+datetime
+time
+bson
+types
+ast
