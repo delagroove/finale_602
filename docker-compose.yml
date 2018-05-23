@@ -1,0 +1,33 @@
+version: "3"
+services:
+  mongo:
+    container_name: mongodb
+    image: mongo
+    volumes:
+      - ./data:/data/db
+    ports:
+      - "27017:27017"
+
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: Dockerfile2
+    ports:
+      - "5000:5000"
+
+
+  teamapp:
+    container_name: webapp
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/final_602
+    ports:
+      - "4200:4200"
+
+    depends_on:
+      - mongo
+      - web
