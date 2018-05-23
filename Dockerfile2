@@ -1,17 +1,16 @@
-FROM node:6
+FROM node:8
 
 WORKDIR /usr/src/app
 
 #RUN git clone https://github.com/mkunissery/data602FinalWeb.git /usr/src/app
 RUN git clone https://github.com/delagroove/testweb.git /usr/src/app
 
-CMD cd /usr/src/app/testweb
+CMD "cd /usr/src/app"
 
 RUN npm install
-RUN npm install -g angular-cli
-RUN pwd
-#RUN ng build
+RUN npm install -g @angular/cli@latest
+RUN ng build
 
-CMD [ "ng", "serve” ]
 
 EXPOSE 4200
+CMD ng serve
