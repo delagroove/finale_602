@@ -10,24 +10,24 @@ services:
 
   web:
     container_name: web
+    restart: always
     build:
       context: .
       dockerfile: Dockerfile2
     ports:
-      - "5000:5000"
-
+      - "0.0.0.0:80:4200"
+    depends_on:
+      - mongo
+      - teamapp
 
   teamapp:
     container_name: webapp
-    restart: always
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
       - .:/final_602
     ports:
-      - "4200:4200"
-
+      - "5000:5000"
     depends_on:
       - mongo
-      - web
