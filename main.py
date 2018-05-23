@@ -30,8 +30,12 @@ def Analysis1():
     return getTop15ByMarketCap()
 
 @app.route('/top15byhvol')
-def Analysis2():
+def Analysis3():
     return getTop15ByHistoricalVol()
+
+@app.route('/getrcorr/<pair>')
+def Analysis2(pair=None):
+    return getRollingCorr(pair)
 
 def GetMongoClient():
     client = MongoClient(port=27017)
@@ -113,7 +117,25 @@ def getTop15ByMarketCap():
     dfret = dfset.corr()
     return dfret.to_json()
 
+def getRollingCorr(pair):
+    cols=[]
+    if pair== None:
+        arrpair = "BTC-ETH".split("-")
+    else:
+        arrpair = pair.split("-")
 
+    cols=[arrpair[0]+"_close", arrpair[1]+"_close"]
+    rencols = [arrpair[0], arrpair[1]]
+
+    dfData = getData()
+    dfset = dfData[cols]
+    dfset.columns = rencols
+    psret = pd.rolling_corr(dfset[arrpair[0]],dfset[arrpair[1]],20)
+    dfret = pd.DataFrame({'idx': dfData["time"], 'rcorr': psret.values})
+    dfret = pd.DataFrame(dfret.loc[dfret['rcorr'] > 0 ])
+    #return dfret[~dfret.isnull()].to_json()
+    #return dfret.to_json()
+    return dfret.to_json()
 
 def getTop15ByHistoricalVol():
     client = MongoClient(port=27017)
