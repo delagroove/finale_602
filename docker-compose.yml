@@ -6,7 +6,7 @@ services:
     volumes:
       - ./data:/data/db
     ports:
-      - "27017:27017"
+      - "0.0.0.0:27017:27017"
 
   web:
     container_name: web
@@ -28,6 +28,6 @@ services:
     volumes:
       - .:/final_602
     ports:
-      - "5000:5000"
+      - "0.0.0.0:5000:5000"
     depends_on:
       - mongo
