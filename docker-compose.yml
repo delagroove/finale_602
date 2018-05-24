@@ -20,6 +20,7 @@ services:
     depends_on:
       - mongo
       - teamapp
+      - pyjob
 
   teamapp:
     container_name: webapp
@@ -34,3 +35,16 @@ services:
       - mongo
     depends_on:
       - mongo
+
+  backendjob:
+    container_name: pyjob
+    build:
+      context: .
+      dockerfile: Dockerfile3
+    volumes:
+      - .:/final_602
+    links:
+      - mongo
+    depends_on:
+      - mongo
+      - teamapp
