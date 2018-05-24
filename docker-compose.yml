@@ -20,7 +20,7 @@ services:
     depends_on:
       - mongo
       - teamapp
-      - pyjob
+      - backendjob
 
   teamapp:
     container_name: webapp
