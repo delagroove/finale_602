@@ -16,6 +16,8 @@ services:
       dockerfile: Dockerfile2
     ports:
       - "0.0.0.0:4200:4200"
+    links:
+      - mongo
     depends_on:
       - mongo
       - teamapp
@@ -29,5 +31,7 @@ services:
       - .:/final_602
     ports:
       - "0.0.0.0:5000:5000"
+    links:
+      - mongo
     depends_on:
       - mongo

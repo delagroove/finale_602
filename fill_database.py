@@ -18,7 +18,7 @@ class CryptoDBUtil():
 
     def coinFiatList(self):
         print(datetime.now())
-        client = MongoClient('mongodb://mongo:27017')
+        client = MongoClient('mongodb://mongo:27017', connect=False)
         # client = MongoClient(port=27017)
         db = client.finals
 

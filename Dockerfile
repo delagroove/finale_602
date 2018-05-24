@@ -5,10 +5,10 @@ WORKDIR /usr/src/app
 COPY requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
-RUN git clone https://github.com/delagroove/finale_602 /usr/src/app/final_602
+COPY . /usr/src/app
+RUN cd /usr/src/app
+RUN python fill_database.py
 
-RUN python /usr/src/app/final_602/fill_database.py
+CMD [ "python", "/usr/src/app/main.py" ]
 
 EXPOSE 5000
-
-CMD [ "python", "/usr/src/app/final_602/main.py" ]

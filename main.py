@@ -37,7 +37,7 @@ def Analysis2(pair=None):
     return getRollingCorr(pair)
 
 def GetMongoClient():
-    client = MongoClient('mongodb://mongo:27017')
+    client = MongoClient('mongodb://mongo:27017',connect=False)
     #client = MongoClient(port=27017)
     return client
 
