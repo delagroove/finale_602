@@ -115,6 +115,7 @@ def getTop15ByMarketCap():
     dfset = dfData[cols]
     dfset.colums = rencols
     dfret = dfset.corr()
+    dfret = dfret.round(2)
     return dfret.to_json()
 
 def getRollingCorr(pair):
@@ -133,6 +134,7 @@ def getRollingCorr(pair):
     psret = pd.rolling_corr(dfset[arrpair[0]],dfset[arrpair[1]],20)
     dfret = pd.DataFrame({'idx': dfData["time"], 'rcorr': psret.values})
     dfret = pd.DataFrame(dfret.loc[dfret['rcorr'] > 0 ])
+    dfret = dfret.round(2)
     #return dfret[~dfret.isnull()].to_json()
     #return dfret.to_json()
     return dfret.to_json()
@@ -174,7 +176,9 @@ def getTop15ByHistoricalVol():
 
     dfset = dfData[top15byvol]
     dfset.columns= rencols
-    return dfset.corr().to_json()
+    dfret = dfset.corr()
+    dfret = dfret.round(2)
+    return dfret.to_json()
 
 if __name__ == "__main__":
     app.run(debug=True)
