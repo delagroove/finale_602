@@ -7,7 +7,6 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . /usr/src/app
 RUN cd /usr/src/app
-RUN python fill_database.py
 
 CMD [ "python", "/usr/src/app/main.py" ]
 
