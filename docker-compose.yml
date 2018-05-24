@@ -15,7 +15,7 @@ services:
       context: .
       dockerfile: Dockerfile2
     ports:
-      - "0.0.0.0:80:4200"
+      - "0.0.0.0:4200:4200"
     depends_on:
       - mongo
       - teamapp
