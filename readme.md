@@ -19,4 +19,4 @@ navigate to `http://localhost:4200` to review both correlation matrices.
 
 ### Screenshot
 
-![Drag Racing](Dragster.jpg)
+![Screenshot](https://raw.githubusercontent.com/delagroove/finale_602/master/screenshot.jpg)
