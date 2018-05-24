@@ -1,6 +1,6 @@
 pandas
 numpy
-pymongo
+pymongo==2.8
 requests
 flask
 datetime
