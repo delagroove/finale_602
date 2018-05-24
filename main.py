@@ -37,11 +37,13 @@ def Analysis2(pair=None):
     return getRollingCorr(pair)
 
 def GetMongoClient():
-    client = MongoClient(port=27017)
+    client = MongoClient('mongodb://mongo:27017')
+    #client = MongoClient(port=27017)
     return client
 
+
 def correlation1():
-    client = MongoClient(port=27017)
+    client = GetMongoClient()
     db = client.final
     result = db.coins.find({'time': { '$gt' : 1506816000, '$lt':1514764800}, 'FROM': 'BTC', 'TO': 'BTS'})
     df = pd.DataFrame(list(result))
@@ -50,14 +52,14 @@ def correlation1():
     print(df.corr())
 
 def correlation2():
-    client = MongoClient(port=27017)
+    client = GetMongoClient()
     db = client.final
     result = db.coins.find({'time': { '$gt' : 1514764800, '$lt':1522540800}})
     print(json.dumps(list(result), sort_keys=True, indent=4, default=json_util.default))
 
 
 def getData():
-    client = MongoClient(port=27017)
+    client = GetMongoClient()
     db = client.finals
     records = db.coins_usd.find({'time': { '$gt' : 1506816000, '$lt':1514764800}})
     db.close
@@ -70,7 +72,7 @@ def getData():
 
 
 def getDataPeriod(start, end):
-    client = MongoClient(port=27017)
+    client = GetMongoClient()
     db = client.finals
     records = db.coins_usd.find({'time': { '$gt' : start, '$lt':end}})
     db.close
@@ -80,7 +82,7 @@ def getDataPeriod(start, end):
     return dfret
 
 def doCorr2():
-    client = MongoClient(port=27017)
+    client = GetMongoClient()
     db = client.finals
     records = db.coins_usd.find({'time': { '$gt' : 1514764800, '$lt':1522540800}})
     recjson = dumps(records)
@@ -94,7 +96,7 @@ def doCorr2():
     return dfcorr.to_json()
 
 def getTop15ByMarketCap():
-    client = MongoClient(port=27017)
+    client = GetMongoClient()
     db = client.finals
     db.close
 
@@ -114,6 +116,7 @@ def getTop15ByMarketCap():
     dfset = dfData[cols]
     dfset.colums = rencols
     dfret = dfset.corr()
+    dfret = dfret.round(2)
     return dfret.to_json()
 
 def getRollingCorr(pair):
@@ -131,13 +134,14 @@ def getRollingCorr(pair):
     dfset.columns = rencols
     psret = pd.rolling_corr(dfset[arrpair[0]],dfset[arrpair[1]],20)
     dfret = pd.DataFrame({'idx': dfData["time"], 'rcorr': psret.values})
+    dfret = dfret.round(2)
     dfret = pd.DataFrame(dfret.loc[dfret['rcorr'] > 0 ])
     #return dfret[~dfret.isnull()].to_json()
     #return dfret.to_json()
     return dfret.to_json()
 
 def getTop15ByHistoricalVol():
-    client = MongoClient(port=27017)
+    client = GetMongoClient()
     db = client.finals
     db.close
 
@@ -176,7 +180,6 @@ def getTop15ByHistoricalVol():
     return dfset.corr().to_json()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False, host='0.0.0.0')
+    #app.run(debug=True)
 
-#getTop15ByMarketCap()
-#getTop15ByHistoricalVol()
